@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Tic Tac Toe</title>
+        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
+        <style>
+            table {
+                margin: auto;
+            }
+            td {
+                border: 1px solid #000;
+                height: 50px;
+                width: 50px;
+            }
+            .player-x, .player-o {
+                color: #000;
+                font-size: 2em;
+            }
+            .player-x:after {
+                content: "X";
+                width: 100%;
+                text-align: center;
+                display: table;
+                vertical-align: middle;
+            }
+            .player-o:after {
+                content: "O";
+                width: 100%;
+                text-align: center;
+                display: table;
+                vertical-align: middle;
+            }
+        </style>
+    </head>
+    <body onload="connected();">
+        <p>Status: <span class="status"></span></p>
+        <table>
+            <tr>
+                <td data-field="1"></td>
+                <td data-field="2"></td>
+                <td data-field="3"></td>
+            </tr>
+            <tr>
+                <td data-field="4"></td>
+                <td data-field="5"></td>
+                <td data-field="6"></td>
+            </tr>
+            <tr>
+                <td data-field="7"></td>
+                <td data-field="8"></td>
+                <td data-field="9"></td>
+            </tr>
+        </table>
+        <script>
+            var socket = io('http://localhost:8000');
+            var table = document.body.querySelector('table');
+            var fields = table.querySelectorAll('td');
+
+            function connected() {
+                socket.emit('connected', { 'player': 'connected' });
+            };
+
+            function makeMove(field) {
+                socket.emit('move', { 'field': field })
+            }
+
+            socket.on('status', function (data) {
+                document.body.querySelector('.status').innerText = data.msg
+                console.log('status:', data.msg);
+            });
+
+            socket.on('alert', function (data) {
+                if (data.refresh) {
+                    if (confirm(data.msg)) {
+                        window.location.reload();
+                    }
+                } else {
+                    alert(data.msg);
+                }
+            });
+
+            socket.on('move', function (data) {
+                console.log(data);
+                table.querySelectorAll('td[data-field="' + data.field + '"]')[0].classList.add('player-' + data.player);
+            });
+
+            _.each(fields, function(field, i) {
+                field.addEventListener('click', function(event) {
+                    var clicked_field = event.target.getAttribute('data-field')
+                    makeMove(clicked_field);
+                });
+            })
+        </script>
+    </body>
+</html>
