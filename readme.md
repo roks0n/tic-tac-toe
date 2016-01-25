@@ -3,8 +3,8 @@
 - Check `package.json`
 
 ### How to run?
-`npm install`
-`npm start`
+- `npm install`
+- `npm start`
 
 ### TODO:
 - handle user disconnectons better
